@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidra's Birthday Celebration | Premium Luxury Invitation & Memories</title>
+  <meta name="description" content="A cinematic, magical single-page birthday celebration website for Sidra with interactive games, photo booth, music, and love notes.">
+  
+  <!-- FontAwesome Icons & Canvas Confetti -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Custom Cursor Glow & Background Canvas -->
+  <div id="cursor-glow" class="cursor-glow"></div>
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Top Header Bar (Logo, Name & Light/Dark Theme Switcher Only) -->
+  <header id="top-header">
+    <div class="top-header-container">
+      <div class="header-brand">
+        <img src="assets/logo.png" alt="Sidra" class="header-avatar-img">
+        <span class="header-title">Sidra's Birthday 👑</span>
+      </div>
+      <button id="header-theme-btn" onclick="toggleTheme()" title="Toggle Light / Dark Mode">
+        <i id="theme-toggle-icon" class="fas fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Custom Celebration Modal -->
+  <div id="celebration-modal">
+    <div class="glass-card celebration-modal-content">
+      <div id="modal-icon" class="modal-icon">🎉</div>
+      <h2 id="modal-title" class="modal-title">Celebration!</h2>
+      <p id="modal-message" class="modal-message">Message text</p>
+      <button class="btn-gold" onclick="AppController.closeModal()"><i class="fas fa-sparkles"></i> Awesome!</button>
+    </div>
+  </div>
+
+  <!-- Video Player Modal -->
+  <div id="videoModal" class="video-modal">
+    <div class="video-content">
+      <span class="close-btn" onclick="closeVideoModal()">&times;</span>
+      <iframe
+        id="videoFrame"
+        width="100%"
+        height="500"
+        src=""
+        frameborder="0"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       0. Secret Password Entry Modal (Commented Out)
+       ========================================================================== -->
+  <!--
+  <div id="password-modal" class="active">
+    <div class="glass-card password-modal-content">
+      <div class="password-split-grid">
+        <div class="password-left-col">
+          <div class="password-avatar-wrap">
+            <img src="assets/logo1.png" alt="Sidra" class="password-avatar-img">
+          </div>
+          <h3>Queen Sidra 👑</h3>
+          <p>Birthday Celebration Entry</p>
+        </div>
+
+        <div class="password-right-col">
+          <h2>🔒 VIP Access Only</h2>
+          <p>Enter the secret 4-digit PIN code to unlock Sidra's celebration!</p>
+
+          <div class="otp-container">
+            <input type="password" id="otp-1" class="otp-box" maxlength="1" readonly placeholder="•">
+            <input type="password" id="otp-2" class="otp-box" maxlength="1" readonly placeholder="•">
+            <input type="password" id="otp-3" class="otp-box" maxlength="1" readonly placeholder="•">
+            <input type="password" id="otp-4" class="otp-box" maxlength="1" readonly placeholder="•">
+          </div>
+
+          <div class="pin-keypad">
+            <button class="keypad-btn" onclick="pressSecurityKeypad('1')">1</button>
+            <button class="keypad-btn" onclick="pressSecurityKeypad('2')">2</button>
+            <button class="keypad-btn" onclick="pressSecurityKeypad('3')">3</button>
+            <button class="keypad-btn" onclick="pressSecurityKeypad('4')">4</button>
+            <button class="keypad-btn" onclick="pressSecurityKeypad('5')">5</button>
+            <button class="keypad-btn" onclick="pressSecurityKeypad('6')">6</button>
+            <button class="keypad-btn" onclick="pressSecurityKeypad('7')">7</button>
+            <button class="keypad-btn" onclick="pressSecurityKeypad('8')">8</button>
+            <button class="keypad-btn" onclick="pressSecurityKeypad('9')">9</button>
+            <button class="keypad-btn clear-btn" onclick="pressSecurityKeypad('clear')">C</button>
+            <button class="keypad-btn" onclick="pressSecurityKeypad('0')">0</button>
+            <button class="keypad-btn submit-btn" onclick="verifySecurityPin()">✓</button>
+          </div>
+
+          <div id="pin-error-msg" class="pin-error-msg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  -->
+
+  <!-- ==========================================================================
+       1. Premium Loading Screen
+       ========================================================================== -->
+  <div id="loader-screen">
+    <div class="loader-cake-container">
+      <img src="assets/cake.png" alt="Sidra's Birthday Cake" class="loader-cake-img">
+    </div>
+    <div class="loader-progress-bar-wrap">
+      <div id="loader-progress" class="loader-progress-bar"></div>
+    </div>
+    <div id="loader-percentage" class="loader-status">0%</div>
+    <p style="color: var(--soft-peach); letter-spacing: 2px; margin-top: 0.5rem;">Preparing Sidra's Birthday Magic...</p>
+  </div>
+
+  <!-- ==========================================================================
+       2. Welcome Popup Modal (Commented out as requested)
+       ==========================================================================
+  <div id="welcome-modal">
+    <div class="glass-card welcome-content">
+      <h1>🎉 Welcome to Sidra's Birthday Celebration 🎉</h1>
+      <p>Step into a world of magic, golden memories, music, and love dedicated to our queen Sidra!</p>
+
+      <div class="welcome-actions">
+        <button id="welcome-open-btn" class="welcome-btn-waiting unlocked"><i class="fas fa-envelope-open-text"></i> Open Invitation</button>
+        <button id="welcome-music-btn" class="welcome-btn-synth"><i class="fas fa-music"></i> Play Party Synth</button>
+      </div>
+      
+      <div style="margin-top: 1.2rem;">
+        <button id="welcome-skip-btn" class="btn-outline" style="padding: 0.5rem 1.6rem; font-size: 0.9rem;">Skip</button>
+      </div>
+    </div>
+  </div>
+  ========================================================================== -->
+
+  <!-- ==========================================================================
+       2. Luxury Red Velvet Theater Curtain Opening Modal
+       ========================================================================== -->
+  <div id="theater-curtain-modal" class="theater-curtain-container active">
+    <!-- Top Royal Valance Banner -->
+    <div class="curtain-valance">
+      <div class="valance-fringe"></div>
+      <div class="valance-emblem">👑 Sidra's Birthday Celebration 👑</div>
+    </div>
+
+    <!-- Left Red Velvet Curtain with Side Memory Image -->
+    <div class="curtain-panel curtain-left">
+      <div class="curtain-folds"></div>
+      <div class="curtain-side-img-wrap left-side-img">
+        <div class="mini-gold-frame">
+          <img src="assets/logo.png" alt="Sidra Left Memory" class="theater-side-avatar-img">
+        </div>
+      </div>
+      <div class="curtain-tassel left-tassel">
+      </div>
+    </div>
+
+    <!-- Right Red Velvet Curtain with Side Memory Image -->
+    <div class="curtain-panel curtain-right">
+      <div class="curtain-folds"></div>
+      <div class="curtain-side-img-wrap right-side-img">
+        <div class="mini-gold-frame">
+          <img src="assets/logo.png" alt="Sidra Right Memory" class="theater-side-avatar-img">
+        </div>
+      </div>
+      <div class="curtain-tassel right-tassel"></div>
+    </div>
+
+    <!-- Center Stage Container (Title On Top + Center Interactive Sidra Image Button) -->
+    <div class="curtain-center-stage">
+      <div class="curtain-text-wrap">
+        <div class="curtain-crown">👑</div>
+        <h1 class="curtain-title">Welcome to Sidra's Celebration</h1>
+      </div>
+
+      <div class="curtain-img-wrap" onclick="openTheaterCurtains()" title="Tap Queen Sidra to Open Stage">
+        <div class="royal-gold-frame curtain-avatar-frame">
+          <img src="assets/logo.png" alt="Queen Sidra" class="theater-avatar-img">
+          <div class="click-pulse-ring"></div>
+        </div>
+        <h3 class="curtain-img-caption">Tap Queen Sidra to Open Stage 💖</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       Main Website Celebration Content (Hidden until 1st Loader Screen 100%)
+       ========================================================================== -->
+  <main id="main-content" style="display: none;">
+    <section class="hero-section" id="hero">
+    <div class="hero-container">
+      <div class="sidra-avatar-wrap">
+        <div class="crown-badge">👑</div>
+        <img src="assets/top.png" alt="Sidra" class="sidra-avatar-img">
+      </div>
+      
+      <h1 class="hero-title">Happy Birthday Sidra</h1>
+      <div class="hero-typed-wrap">
+        <span id="hero-typed-text"></span><span class="typed-cursor">|</span>
+      </div>
+
+      <div class="hero-date-badge">
+        <i class="fas fa-calendar-alt"></i> AUGUST 8TH • CELEBRATION TIME
+      </div>
+
+      <div class="hero-actions">
+        <a href="#about" class="btn-primary"><i class="fas fa-heart"></i> Discover Sidra</a>
+        <a href="#gallery" class="btn-gold"><i class="fas fa-images"></i> View Memories</a>
+        <a href="#arcade" class="btn-outline"><i class="fas fa-gamepad"></i> Play Arcade</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       4. Live Countdown Timer Section
+       ========================================================================== -->
+  <section class="countdown-section" id="countdown">
+    <div class="section-title">
+      <h2 id="countdown-heading">The Birthday Countdown</h2>
+      <p>Counting down every magical second to Sidra's Special Day</p>
+    </div>
+
+    <div class="countdown-grid">
+      <div class="glass-card countdown-card">
+        <div id="cnt-days" class="countdown-number">00</div>
+        <div class="countdown-label">Days</div>
+      </div>
+      <div class="glass-card countdown-card">
+        <div id="cnt-hours" class="countdown-number">00</div>
+        <div class="countdown-label">Hours</div>
+      </div>
+      <div class="glass-card countdown-card">
+        <div id="cnt-mins" class="countdown-number">00</div>
+        <div class="countdown-label">Minutes</div>
+      </div>
+      <div class="glass-card countdown-card">
+        <div id="cnt-secs" class="countdown-number">00</div>
+        <div class="countdown-label">Seconds</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       5. About Sidra Section
+       ========================================================================== -->
+  <section class="about-section post-countdown-content" id="about">
+    <div class="section-title">
+      <h2>About Sidra</h2>
+      <p>Get to know the queen of the day!</p>
+    </div>
+
+    <div class="glass-card about-grid">
+      <div class="about-img-wrap">
+        <video id="about-video-player" width="100%" height="100%" autoplay loop playsinline controls style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
+          <source src="assets/video/sidra.mp4" type="video/mp4">
+          <iframe id="about-yt-iframe" width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/OVLrXFwNKT4?autoplay=1&mute=1&loop=1&playlist=OVLrXFwNKT4&controls=1&playsinline=1" title="Sidra's Birthday Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </video>
+      </div>
+      <div class="about-details">
+        <h3 style="font-size: 2.2rem; color: var(--accent-gold); margin-bottom: 0.5rem;">Sidra</h3>
+        <p style="color: var(--soft-peach); margin-bottom: 1.5rem;">A beautiful soul who brings sunshine, laughter, and elegance wherever she goes.</p>
+
+        <div class="about-info-list">
+          <div class="info-item">
+            <i class="fas fa-utensils"></i>
+            <span><strong>Favorite Food</strong><p>Mango's & Chocolates 🍕</p></span>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-palette"></i>
+            <span><strong>Favorite Color</strong><p>Pink & Lavender 🌸</p></span>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-music"></i>
+            <span><strong>Favorite Song</strong><p>Nani Teri Morni 🎧</p></span>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-star"></i>
+            <span><strong>Superpower</strong><p>Lighting Up Any Room ✨</p></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cake-section post-countdown-content" id="cake">
+    <div class="section-title">
+      <h2>Interactive Birthday Cake</h2>
+      <p>Make a wish and blow out the candles!</p>
+    </div>
+
+    <div class="cake-stage">
+      <div class="cake-image-wrap">
+        <img src="assets/cake.png" alt="Sidra's Pink Birthday Cake" class="cake-main-img">
+        <div class="cake-flames-overlay">
+          <div class="flame flame-1"></div>
+          <div class="flame flame-2"></div>
+          <div class="flame flame-3"></div>
+          <div class="flame flame-4"></div>
+          <div class="flame flame-5"></div>
+          <div class="flame flame-6"></div>
+          <div class="flame flame-7"></div>
+        </div>
+      </div>
+    </div>
+
+    <button id="blow-candles-btn" class="btn-gold" onclick="blowCakeCandles()"><i class="fas fa-wind"></i> Blow Candles & Make a Wish!</button>
+  </section>
+
+  <!-- ==========================================================================
+       6. Premium Image Gallery (12 Images Masonry Grid)
+       ========================================================================== -->
+  <section class="gallery-section post-countdown-content" id="gallery">
+    <div class="section-title">
+      <h2>Memory Gallery</h2>
+      <p>A collection of timeless moments & unforgettable smiles (Click to enlarge)</p>
+    </div>
+
+    <div class="gallery-grid">
+      <div class="gallery-item glass-card" onclick="openLightbox(0)"><img src="assets/s1.png" alt="Memory 1"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+      <div class="gallery-item glass-card" onclick="openLightbox(1)"><img src="assets/s2.png" alt="Memory 2"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+      <div class="gallery-item glass-card" onclick="openLightbox(2)"><img src="assets/s3.png" alt="Memory 3"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+      <div class="gallery-item glass-card" onclick="openLightbox(3)"><img src="assets/s4.png" alt="Memory 4"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+      <div class="gallery-item glass-card" onclick="openLightbox(4)"><img src="assets/s5.png" alt="Memory 5"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+      <div class="gallery-item glass-card" onclick="openLightbox(5)"><img src="assets/s6.png" alt="Memory 6"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+      <div class="gallery-item glass-card" onclick="openLightbox(6)"><img src="assets/s7.png" alt="Memory 7"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+      <div class="gallery-item glass-card" onclick="openLightbox(7)"><img src="assets/s8.png" alt="Memory 8"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+      <div class="gallery-item glass-card" onclick="openLightbox(8)"><img src="assets/s9.png" alt="Memory 9"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+      <div class="gallery-item glass-card" onclick="openLightbox(9)"><img src="assets/s10.png" alt="Memory 10"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+      <div class="gallery-item glass-card" onclick="openLightbox(10)"><img src="assets/s11.png" alt="Memory 11"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+      <div class="gallery-item glass-card" onclick="openLightbox(11)"><img src="assets/logo.png" alt="Memory 12"><div class="gallery-overlay"><i class="fas fa-search-plus gallery-icon"></i></div></div>
+    </div>
+  </section>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox-modal">
+    <div class="lightbox-content">
+      <span id="lightbox-close" class="lightbox-close" onclick="closeLightbox()">&times;</span>
+      <button class="lightbox-nav prev" onclick="navigateLightbox(-1)">&lang;</button>
+      <img id="lightbox-img" src="" alt="Full View">
+      <button class="lightbox-nav next" onclick="navigateLightbox(1)">&rang;</button>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       7. Memory Timeline
+       ========================================================================== -->
+  <!-- <section class="timeline-section post-countdown-content" id="timeline">
+    <div class="section-title">
+      <h2>Journey of Memories</h2>
+      <p>Milestones that shaped a wonderful life</p>
+    </div>
+
+    <div class="timeline-container">
+      <div class="glass-card timeline-card left">
+        <div class="timeline-dot"></div>
+        <h4 style="color: var(--accent-gold);">Childhood Wonders 🎈</h4>
+        <p style="color: var(--soft-peach);">Growing up with sweet dreams, endless curiosity, and innocent smiles.</p>
+      </div>
+      <div class="glass-card timeline-card right">
+        <div class="timeline-dot"></div>
+        <h4 style="color: var(--primary-pink);">School & Lifelong Friends 📚</h4>
+        <p style="color: var(--soft-peach);">Creating bonds of friendship that last forever and unforgettable giggles.</p>
+      </div>
+      <div class="glass-card timeline-card left">
+        <div class="timeline-dot"></div>
+        <h4 style="color: var(--lavender);">College Dreams 🌟</h4>
+        <p style="color: var(--soft-peach);">Chasing ambition, discovering passions, and blooming into elegance.</p>
+      </div>
+      <div class="glass-card timeline-card right">
+        <div class="timeline-dot"></div>
+        <h4 style="color: var(--accent-gold);">Recent Milestones 👑</h4>
+        <p style="color: var(--soft-peach);">Today, celebrating a fabulous birthday filled with boundless potential!</p>
+      </div>
+    </div>
+  </section> -->
+
+  <!-- ==========================================================================
+       8. Birthday Wishes Section (Original 2 Boxes Only)
+       ========================================================================== -->
+  <section class="wishes-section post-countdown-content" id="wishes">
+    <div class="section-title">
+      <h2>Heartfelt Birthday Wishes</h2>
+      <p>Warm messages from friends & family</p>
+    </div>
+
+    <div class="wishes-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+      <div class="glass-card wish-card">
+        <img src="assets/sidra_portrait.png" alt="Avatar" class="wish-avatar">
+        <p class="wish-text">"Sidra, you bring so much joy into everyone's life. May this birthday bring you as much happiness as you give to the world!"</p>
+        <h4 style="color: var(--accent-gold); font-family: var(--font-heading); font-size: 1.2rem;">Best Wishes Always</h4>
+        <div style="margin-top: 1rem;">
+          <button class="like-heart-btn" onclick="toggleWishLike(this)"><i class="far fa-heart"></i> Like Wish <span class="like-count">12</span></button>
+        </div>
+      </div>
+      <div class="glass-card wish-card">
+        <img src="assets/birthday_cake.jpg" alt="Avatar" class="wish-avatar">
+        <p class="wish-text">"To the queen of the day! Wishing you endless success, golden laughter, and magical adventures ahead!"</p>
+        <h4 style="color: var(--primary-pink); font-family: var(--font-heading); font-size: 1.2rem;">Family & Friends</h4>
+        <div style="margin-top: 1rem;">
+          <button class="like-heart-btn" onclick="toggleWishLike(this)"><i class="far fa-heart"></i> Like Wish <span class="like-count">24</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       9. Video Gallery Section
+       ========================================================================== -->
+  <section class="video-section post-countdown-content" id="videos">
+    <div class="section-title">
+      <h2>Video Memories</h2>
+      <p>Relive golden highlights & celebrations (Click to Play)</p>
+    </div>
+
+    <div class="video-grid">
+      <div class="glass-card video-card" onclick="openVideoModal('assets/video/video1.mp4')">
+        <div class="video-thumbnail">
+          <img src="assets/birthday_cake.jpg" alt="Video Thumbnail">
+          <div class="play-icon"><i class="fas fa-play-circle"></i></div>
+        </div>
+        <div style="padding: 1rem; text-align: center;">
+          <h4 style="color: var(--accent-gold);">Sidra's Celebration Video 🎂</h4>
+          <p style="color: var(--soft-peach); font-size: 0.85rem;">Tap to play video</p>
+        </div>
+      </div>
+      <div class="glass-card video-card" onclick="openVideoModal('assets/video/video2.mp4')">
+        <div class="video-thumbnail">
+          <img src="assets/top.png" alt="Video Thumbnail">
+          <div class="play-icon"><i class="fas fa-play-circle"></i></div>
+        </div>
+        <div style="padding: 1rem; text-align: center;">
+          <h4 style="color: var(--primary-pink);">Musical Birthday Highlights 🎵</h4>
+          <p style="color: var(--soft-peach); font-size: 0.85rem;">Tap to play video</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       10. Floating Music Player
+       ========================================================================== -->
+  <div id="floating-music-player" class="post-countdown-content">
+    <img id="player-album-art" src="assets/logo.png" alt="Album" class="player-album-art">
+    <div class="player-info">
+      <div id="player-track-title" style="font-weight: 600; font-size: 0.9rem; color: var(--pure-white);">Sidra's Birthday Melody</div>
+      <div id="player-track-artist" style="font-size: 0.75rem; color: var(--soft-peach);">Magic Synth Orchestra</div>
+    </div>
+    <div class="player-controls">
+      <button class="player-btn prev-btn" onclick="window.birthdayAudio.prevTrack()"><i class="fas fa-step-backward"></i></button>
+      <button class="player-btn play-toggle-btn" onclick="window.birthdayAudio.toggle()"><i id="player-play-btn-icon" class="fas fa-play"></i></button>
+      <button class="player-btn next-btn" onclick="window.birthdayAudio.nextTrack()"><i class="fas fa-step-forward"></i></button>
+    </div>
+    <!-- Compact Mobile Music Toggle Button -->
+    <button class="mobile-music-toggle-btn" onclick="window.birthdayAudio.toggle()" title="Toggle Music On/Off">
+      <i id="mobile-music-icon" class="fas fa-music"></i>
+    </button>
+  </div>
+
+  <!-- ==========================================================================
+       11. Gift Section & 12. Cake Section & 13. Surprise Section
+       ========================================================================== -->
+  <section class="gift-section post-countdown-content" id="gifts">
+    <div class="section-title">
+      <h2>Unwrap Birthday Gifts</h2>
+      <p>Tap a gift box to open Sidra's special birthday surprises!</p>
+    </div>
+
+    <div class="gifts-grid">
+      <div class="glass-card gift-card" onclick="openGiftModal('Golden Crown 👑', 'A royal golden crown for the queen of the day! May you reign with elegance, confidence, and grace!', '👑')">
+        <div class="gift-icon-box">👑</div>
+        <h4 style="color: var(--accent-gold); font-family: var(--font-heading); font-size: 1.3rem;">Royal Crown</h4>
+        <p style="color: var(--soft-peach); font-size: 0.9rem; margin-top: 0.4rem;">Tap to unwrap</p>
+      </div>
+      <div class="glass-card gift-card" onclick="openGiftModal('Golden Bouquet 💐', 'Fresh golden roses and sweet lavender blooms symbolizing love, warmth, and everlasting joy!', '💐')">
+        <div class="gift-icon-box">💐</div>
+        <h4 style="color: var(--primary-pink); font-family: var(--font-heading); font-size: 1.3rem;">Golden Bouquet</h4>
+        <p style="color: var(--soft-peach); font-size: 0.9rem; margin-top: 0.4rem;">Tap to unwrap</p>
+      </div>
+      <div class="glass-card gift-card" onclick="openGiftModal('Luxury Chocolates 🍫', 'Artisanal luxury chocolates as sweet and delightful as Sidra\'s heart!', '🍫')">
+        <div class="gift-icon-box">🍫</div>
+        <h4 style="color: var(--accent-gold); font-family: var(--font-heading); font-size: 1.3rem;">Luxury Chocolates</h4>
+        <p style="color: var(--soft-peach); font-size: 0.9rem; margin-top: 0.4rem;">Tap to unwrap</p>
+      </div>
+    </div>
+  </section>
+
+  
+
+  <section class="surprise-section post-countdown-content" id="surprise">
+    <div class="section-title">
+      <h2>Surprise Mystery Box</h2>
+      <p>Tap the box to unlock Sidra's Birthday Secret!</p>
+    </div>
+    
+    <div class="glass-card" style="max-width: 550px; margin: 0 auto; padding: 2.5rem 1.5rem;">
+      <div id="mystery-box" class="mystery-box-wrap" onclick="openMysteryBox()">🎁</div>
+      <div>
+        <button class="btn-gold" onclick="openMysteryBox()"><i class="fas fa-box-open"></i> Unlock Surprise Mystery Box!</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       14. Interactive Games Arcade Section
+       ========================================================================== -->
+  <section class="games-section post-countdown-content" id="arcade">
+    <div class="section-title">
+      <h2>Birthday Games Arcade</h2>
+      <p>Fun interactive games created just for Sidra!</p>
+    </div>
+
+    <div class="games-tabs">
+      <button class="game-tab-btn active" data-tab="memory"><i class="fas fa-brain"></i> Memory Match</button>
+      <button class="game-tab-btn" data-tab="puzzle"><i class="fas fa-puzzle-piece"></i> Birthday Puzzle</button>
+      <button class="game-tab-btn" data-tab="tictactoe"><i class="fas fa-times-circle"></i> Tic-Tac-Toe</button>
+      <button class="game-tab-btn" data-tab="wheel"><i class="fas fa-dharmachakra"></i> Spin Wheel</button>
+    </div>
+
+    <div class="glass-card game-container">
+      <!-- Memory Game Panel -->
+      <div id="game-memory" class="game-panel active">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+          <span id="memory-moves" style="font-weight: 600; color: var(--accent-gold);">Moves: 0</span>
+          <button class="btn-outline" onclick="window.gamesManager.renderMemoryGrid()">Restart</button>
+        </div>
+        <div id="memory-grid" class="memory-grid"></div>
+      </div>
+
+      <!-- Birthday Slider Puzzle Challenge Panel -->
+      <div id="game-puzzle" class="game-panel">
+        <div class="puzzle-controls-bar">
+          <div class="puzzle-top-row">
+            <div class="puzzle-controls-group">
+              <label style="font-weight: 700; color: var(--text-main);">Difficulty</label>
+              <select id="puzzle-difficulty" class="btn-outline" style="padding: 0.6rem 1.2rem; background: var(--card-bg-dark);">
+                <option value="3">Easy (3 × 3)</option>
+                <option value="4">Medium (4 × 4)</option>
+                <option value="5">Hard (5 × 5)</option>
+              </select>
+              <button id="puzzle-new-btn" class="btn-primary" style="padding: 0.6rem 1.4rem;"><i class="fas fa-redo"></i> New Game</button>
+              <button id="puzzle-solution-btn" class="btn-outline" style="padding: 0.6rem 1.4rem;"><i class="fas fa-check-double"></i> Solve Board</button>
+              <button id="puzzle-preview-modal-btn" class="btn-gold" style="padding: 0.6rem 1.4rem;"><i class="fas fa-image"></i> View Target Image</button>
+            </div>
+            <div class="puzzle-stats-group">
+              <span>Time: <span id="puzzle-time" style="color: var(--primary-pink);">00:00</span></span>
+              <span>Moves: <span id="puzzle-moves" style="color: var(--accent-gold);">0</span></span>
+              <button id="puzzle-choose-btn" class="btn-gold" style="padding: 0.6rem 1.4rem;"><i class="fas fa-folder-open"></i> Choose Image</button>
+              <input type="file" id="puzzle-img-file" accept="image/*" style="display: none;">
+            </div>
+          </div>
+        </div>
+
+        <div class="puzzle-game-layout">
+          <div class="puzzle-board-wrap">
+            <div id="puzzle-board" class="puzzle-board"></div>
+          </div>
+          <div class="glass-card puzzle-solution-card">
+            <h4 style="color: var(--accent-gold); font-size: 1.1rem;">Solution preview</h4>
+            <img id="puzzle-preview-img" src="assets/sidra_portrait.png" alt="Solution Preview" class="puzzle-preview-img">
+            <p style="font-size: 0.85rem; color: var(--soft-peach); margin-top: 1rem; font-style: italic;">Tip: drag a piece and drop it on another piece to swap them (works with touch).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Birthday Tic-Tac-Toe Game Panel (Luxury Glassmorphic Design) -->
+      <div id="game-tictactoe" class="game-panel">
+        <div class="ttt-controls-bar">
+          <div class="ttt-mode-wrap">
+            <label style="font-weight: 700; color: var(--text-main);">Game Mode</label>
+            <select id="ttt-mode-select" class="btn-outline" style="padding: 0.6rem 1.2rem; background: var(--card-bg-dark);">
+              <option value="vs-bot">Queen 👑 vs Smart Bot 💖</option>
+              <option value="pass-play">2 Players Pass & Play</option>
+            </select>
+          </div>
+          <button id="ttt-restart-btn" class="btn-primary" style="padding: 0.6rem 1.4rem;"><i class="fas fa-redo"></i> Restart Match</button>
+        </div>
+
+        <div class="ttt-scores-wrap">
+          <div class="glass-card ttt-score-card">
+            <h5>Queen 👑</h5>
+            <div id="ttt-score-p1" class="ttt-score-val">0</div>
+          </div>
+          <div class="glass-card ttt-score-card">
+            <h5>Ties 🤝</h5>
+            <div id="ttt-score-ties" class="ttt-score-val">0</div>
+          </div>
+          <div class="glass-card ttt-score-card">
+            <h5>Heart 💖</h5>
+            <div id="ttt-score-p2" class="ttt-score-val">0</div>
+          </div>
+        </div>
+
+        <div id="ttt-status" class="ttt-status-banner">Queen 👑's Turn</div>
+        <div id="ttt-board" class="ttt-grid"></div>
+      </div>
+
+      <!-- Spin Wheel Panel -->
+      <div id="game-wheel" class="game-panel" style="text-align: center;">
+        <div class="wheel-container">
+          <div class="wheel-pointer"></div>
+          <canvas id="spin-wheel-canvas"></canvas>
+        </div>
+        <button id="spin-wheel-btn" class="btn-gold" style="margin-top: 1.5rem;"><i class="fas fa-redo"></i> Spin the Wheel!</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       15. Photo Booth Section (Hidden per user request)
+       ========================================================================== -->
+  <section class="photobooth-section post-countdown-content" id="photobooth" style="display: none !important;">
+    <div class="section-title">
+      <h2>Birthday Photo Booth</h2>
+      <p>Snap a selfie with birthday crown overlays & filters!</p>
+    </div>
+
+    <div class="glass-card" style="text-align: center;">
+      <div class="booth-canvas-wrap">
+        <canvas id="booth-canvas"></canvas>
+      </div>
+
+      <div class="booth-controls">
+        <select id="booth-filter-select" class="btn-outline" style="background: var(--card-bg-dark);">
+          <option value="none">Filter: Normal Glow</option>
+          <option value="glam">Filter: Pink Glam</option>
+          <option value="vintage">Filter: Vintage Dream</option>
+          <option value="cyber">Filter: Cyber Gold</option>
+        </select>
+        <button id="booth-snap-btn" class="btn-gold"><i class="fas fa-camera"></i> Take & Download Photo</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       16. Love Notes Board
+       ========================================================================== -->
+  <section class="notes-section post-countdown-content" id="notes">
+    <div class="section-title">
+      <h2>Love Notes Board</h2>
+      <p>Leave a pinned note of love for Sidra!</p>
+    </div>
+
+    <div class="glass-card" style="margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+      <input type="text" id="new-note-input" placeholder="Write a warm birthday note for Sidra..." style="flex: 1; padding: 0.8rem 1.2rem; border-radius: 30px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.3); color: #fff;">
+      <button id="add-note-btn" class="btn-primary"><i class="fas fa-thumbtack"></i> Pin Note</button>
+    </div>
+
+    <div id="love-notes-grid" class="notes-grid"></div>
+  </section>
+
+  <!-- ==========================================================================
+       17. Footer Section & Scroll Top
+       ========================================================================== -->
+  <footer class="post-countdown-content">
+    <h3 style="font-family: var(--font-cursive); font-size: 3rem; color: var(--accent-gold);">Happy Birthday Sidra</h3>
+    <p style="color: var(--soft-peach);">Made with ❤️ for an extraordinary birthday celebration</p>
+
+    <!-- Developer Badge Inside Footer -->
+    <a href="https://github.com/rTechCoding" target="_blank" rel="noopener noreferrer" id="footer-dev-badge" class="footer-dev-badge" title="Visit Rahat Ansari (rTechCoding) GitHub Profile">
+      <i class="fab fa-github github-badge-icon"></i>
+      <span>Designed & Developed by <strong>Rahat Ansari | rTechCoding</strong></span>
+    </a>
+
+    <!-- <div class="footer-socials">
+      <a href="#"><i class="fab fa-instagram"></i></a>
+      <a href="#"><i class="fab fa-facebook"></i></a>
+      <a href="#"><i class="fab fa-twitter"></i></a>
+      <a href="#"><i class="fab fa-whatsapp"></i></a>
+    </div> -->
+
+    <p style="font-size: 0.85rem; color: rgba(255,255,255,0.5);">© 2026 Sidra's Birthday Celebration • All Rights Reserved</p>
+  </footer>
+
+  <!-- Background MP3 Audio Player -->
+  <audio id="bg-audio-player" src="assets/audio/birthday_song.mp3" preload="auto"></audio>
+
+  <!-- App Scripts -->
+  <script src="js/audio-engine.js"></script>
+  <script src="js/canvas-decorations.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/photo-booth.js"></script>
+  <script src="js/love-notes.js"></script>
+  <script src="js/security.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
